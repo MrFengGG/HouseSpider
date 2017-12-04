@@ -20,3 +20,9 @@ class HouseItem(scrapy.Item):
 		sumPrice = scrapy.Field()
 		unitPrice = scrapy.Field()
 		_id = scrapy.Field()
+		imageurl = scrapy.Field()
+		fromUrl = scrapy.Field()
+		city = scrapy.Field()
+		nowTime = scrapy.Field()
+		status = scrapy.Field()
+
