@@ -31,3 +31,20 @@ CITYLIST = {
       "其他":{"香港":"hk|2050","澳门":"am|9399","台湾":"tw|2051","全国":"quanguo|8728","其他":"cn|2258"},
       "海外":{"洛杉矶":"gllosangeles","旧金山":"glsanfrancisco","纽约":"glnewyork","多伦多":"gltoronto","温哥华":"glvancouver","伦敦":"glgreaterlondon","莫斯科":"glmoscow","首尔":"glseoul","东京":"gltokyo","新加坡":"glsingapore","曼谷":"glbangkok","清迈":"glchiangmai","迪拜":"gldubai","奥克兰":"glauckland","悉尼":"glsydney","墨尔本":"glmelbourne","其他海外城市":"city"}
     }
+import pymongo
+
+def pushData():
+	client = pymongo.MongoClient("127.0.0.1",27017)
+	col = client.ershoufang['cityhost']
+	citylist = CITYLIST
+	for provience in citylist:
+		for city in CITYLIST[provience]:
+						try:
+							col.insert({"_id":provience+city,"provience":provience,"city":city,"cityhost":CITYLIST[provience][city].split("|")[0],"status":False})
+							print("插入%s省%s市"%(provience,city))
+						except:
+							print("该城市信息已存在")
+	client.close()
+if __name__ == "__main__":
+	pushData()
+	

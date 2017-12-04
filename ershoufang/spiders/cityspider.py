@@ -7,32 +7,38 @@ import re
 import scrapy
 from datas import CITYLIST
 import time
+import pymongo
 from scrapy.utils.project import get_project_settings
 class erShouSpider(Spider):
 	name = "ershoufang2"
-	settings = get_project_settings()
-	city = settings['CITY']
-	cityP = ''
 	allowed_domains = ["58.com"]
-	fillUrl = [""]
+	
+	def __init__(self):
+		super(erShouSpider,self).__init__()
+		self.settings = get_project_settings()
+		self.client = pymongo.MongoClient(
+																self.settings['MONGO_IP'],
+																self.settings['MONGO_PORT'])
+		self.cities_db = self.client[self.settings['CITY_DB']]
+		self.cities_Col = self.cities_db[self.settings['CITY_COL']]
+		self.fillurl=""
+		self.cityhost=""
+		self.city=""
 	def start_requests(self):
-			result = []
-			for pro in CITYLIST:
-				if self.city in CITYLIST[pro]:
-					print(self.city)
-					self.cityP = CITYLIST[pro][self.city].split("|")[0]
-					print(self.cityP)
-					self.fillUrl[0] = "http://"+self.cityP+".58.com/ershoufang/"
-					print(self.fillUrl)
-					result.append(scrapy.Request(self.fillUrl[0]))
-					return result
-			return None
+		if self.cities_Col.count({"status":False}) <= 0:
+			self.cities_Col.update({"status":False},{"$set":{"status":False}})
+		content = self.cities_Col.find_one({"status":False})
+		self.cities_Col.update({"_id":content["_id"]},{"$set":{"status":True}})
+		self.client.close()
+		self.cityhost = content['cityhost']
+		self.fillUrl = "http://%s.58.com/ershoufang/"%self.cityhost
+		self.city = content["_id"]
+		return [scrapy.Request(self.fillUrl)]
 	def parseUrls(self,html):
 		links = html.xpath(".//a/@href")
 		urls = []
 		for link in links:
-			#print(link)
-			if StringUtil.filtString(self.fillUrl[0]+"pn\d+?/",link):
+			if StringUtil.filtString(self.fillUrl+"pn\d+?/",link):
 				
 				urls.append(link)
 		return urls

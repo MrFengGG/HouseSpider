@@ -17,7 +17,6 @@ class ErshoufangPipeline(object):
 				host=self.settings['MONGO_IP'],
 				port=self.settings['MONGO_PORT'])
 			self.db = self.client[self.settings['MONGO_DB']]
-			self.coll = self.db[self.settings['CITY']]
 	
 		def process_item(self, item, spider):
 			try:
@@ -29,7 +28,8 @@ class ErshoufangPipeline(object):
 					print("删除")
 					self.db.ershoufang.remove({"_id":item["_id"]})
 				'''
-				self.coll.insert(dict(item))
+				coll = self.db[self.settings['ALL']]
+				coll.insert(dict(item))
 				print("插入一个房子"+item['address']+"城市为"+item['city'])
 			except Exception,e:
 				print(item['address']+'已经存在城市是'+item['city'])

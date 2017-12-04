@@ -13,8 +13,9 @@ BOT_NAME = 'ershoufang'
 MONGO_IP = '127.0.0.1'
 MONGO_PORT = 27017
 MONGO_DB = 'ershoufang'
-CITY = '武汉'
-
+CITY_DB =  'ershoufang'
+CITY_COL = 'cityhost'
+ALL = 'allhousedata'
 SPIDER_MODULES = ['ershoufang.spiders']
 NEWSPIDER_MODULE = 'ershoufang.spiders'
 
