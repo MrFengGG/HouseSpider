@@ -1,11 +1,14 @@
 #encoding=utf-8
+import sys
+
+sys.path.append("..")
 from scrapy.spiders import Spider
 from lxml import html
-from utils import NumberUtil,StringUtil
+import plug
+from plug.utils import StringUtil,NumberUtil
 from ershoufang.items import HouseItem
 import re
 import scrapy
-from datas import CITYLIST
 import time
 import pymongo
 from scrapy.utils.project import get_project_settings
@@ -25,6 +28,7 @@ class erShouSpider(Spider):
 		self.cityhost=""
 		self.city=""
 	def start_requests(self):
+		requests = []
 		if self.cities_Col.count({"status":False}) <= 0:
 			self.cities_Col.update({"status":False},{"$set":{"status":False}})
 		content = self.cities_Col.find_one({"status":False})
@@ -33,7 +37,12 @@ class erShouSpider(Spider):
 		self.cityhost = content['cityhost']
 		self.fillUrl = "http://%s.58.com/ershoufang/"%self.cityhost
 		self.city = content["_id"]
-		return [scrapy.Request(self.fillUrl)]
+		requests.append(scrapy.Request(self.fillUrl))
+		'''
+		for i in range(10):
+			requests.append(scrapy.Request(self.fillUrl + "pn"+str(2*i)))
+		'''
+		return requests
 	def parseUrls(self,html):
 		links = html.xpath(".//a/@href")
 		urls = []
@@ -68,7 +77,7 @@ class erShouSpider(Spider):
 										city=self.city,
 										fromUrl = url,
 										nowTime = time.time(),
-										status = False)
+										status = "SUBSPENDING")
 									)
 		return items
 	def printItem(self,item):
@@ -82,9 +91,7 @@ class erShouSpider(Spider):
 		print("房屋均价是:"+item['unitPrice'])
 	def parse(self,response):
 		if(response.body =='None'):
-			print("存在")
 			return
-		print("开始爬取%s"%response.url)
 		doc = html.fromstring(response.body.decode("utf-8"))
 		urls = self.parseUrls(doc)
 		items = self.parseItems(doc,response.url)

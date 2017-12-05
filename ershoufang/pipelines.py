@@ -8,7 +8,7 @@ from scrapy.utils.project import get_project_settings
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
-
+from ershoufang.items import ProxyItem
 
 class ErshoufangPipeline(object):
 		def __init__(self):
@@ -17,8 +17,14 @@ class ErshoufangPipeline(object):
 				host=self.settings['MONGO_IP'],
 				port=self.settings['MONGO_PORT'])
 			self.db = self.client[self.settings['MONGO_DB']]
-	
+			self.proxyclient = self.proxy = self.client[self.settings['PROXY_DB']][self.settings['POOL_NAME']]
+			self.itemNumber = 0
+		def process_proxy(self,item):
+			self.proxyclient.insert(dict(item))
 		def process_item(self, item, spider):
+			if isinstance (item,ProxyItem):
+				self.process_proxy(item)
+				return item
 			try:
 				if not item['address']:	
 					print(item["fromUrl"+"网页异常"])
@@ -30,10 +36,12 @@ class ErshoufangPipeline(object):
 				'''
 				coll = self.db[self.settings['ALL']]
 				coll.insert(dict(item))
-				print("插入一个房子"+item['address']+"城市为"+item['city'])
+				self.itemNumber += 1
+				print("爬取到第%s个房屋,地址为%s"%(self.itemNumber,item['address']))
 			except Exception,e:
-				print(item['address']+'已经存在城市是'+item['city'])
+				pass
 			return item
 		def spider_closed(self,spider):
 			self.client.close()
 			self.db.close()	
+			print("本次爬取共爬取到%s条房屋数据"%self.itemNumber)

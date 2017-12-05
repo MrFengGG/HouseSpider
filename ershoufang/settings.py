@@ -15,17 +15,21 @@ MONGO_PORT = 27017
 MONGO_DB = 'ershoufang'
 CITY_DB =  'ershoufang'
 CITY_COL = 'cityhost'
+PROXY_DB = 'proxy'
+POOL_NAME = 'proxypool'
 ALL = 'allhousedata'
 SPIDER_MODULES = ['ershoufang.spiders']
 NEWSPIDER_MODULE = 'ershoufang.spiders'
-
+SIZE = 10
 DOWNLOADER_MIDDLEWARES={
 		'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware':None,  
 		
 		#'scrapy_crawlera.CrawleraMiddleware': 600,
-		'ershoufang.middlewares.MyUserAgentMiddleware':400
+		'ershoufang.middlewares.MyUserAgentMiddleware':400,
+		'scrapy.downloadermiddlewares.retry.RetryMiddleware':300
 }
-
+RETRY_ENABLED=True
+RETRY_ITEMS=10
 MY_USER_AGENT = [
     "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; AcooBrowser; .NET CLR 1.1.4322; .NET CLR 2.0.50727)",
     "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0; Acoo Browser; SLCC1; .NET CLR 2.0.50727; Media Center PC 5.0; .NET CLR 3.0.04506)",
@@ -117,6 +121,7 @@ ITEM_PIPELINES = {
     'ershoufang.pipelines.ErshoufangPipeline': 300,
 }
 
+DOWNLOAD_TIMEOUT = 10
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html
 #AUTOTHROTTLE_ENABLED = True

@@ -1,7 +1,7 @@
 #encoding=utf-8
 from scrapy.spiders import Spider
 from lxml import html
-from utils import NumberUtil,StringUtil
+from plug.utils import NumberUtil,StringUtil
 from ershoufang.items import HouseItem
 import re
 import scrapy
