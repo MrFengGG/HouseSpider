@@ -128,14 +128,15 @@ class LocationDumper():
 	def __del(self):
 		self.client.close()
 if __name__ == "__main__":
+		
 	starttime = datetime.datetime.now()
-	d = LocationDumper("127.0.0.1",
-										  27017,
-									   "ershoufang",
-									   "location",
-									   "ershoufang",
-								     "allhousedata",
-											requestNum = 10)
+	d = LocationDumper(MONGO_IP,
+										 MONGO_PORT,
+									   LOCATION_DB,
+									   LOCATION_COLL,
+									   SOURCE_DB,
+								     SOURCE_COLL,
+											requestNum = REQUEST_NUM)
 	d.parse()
 	endtime = datetime.datetime.now()
-	print((endtime-starttime).seconds)
+	rint((endtime-starttime).seconds)
