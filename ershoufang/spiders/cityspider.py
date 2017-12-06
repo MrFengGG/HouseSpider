@@ -27,7 +27,18 @@ class erShouSpider(Spider):
 		self.fillurl=""
 		self.cityhost=""
 		self.city=""
-	def start_requests(self):
+	def get_specify_request(self):
+		#返回指定的请求
+		condition = {"city":self.settings['CITY']}
+		if self.settings['PROVIENCE'] and self.settings['PROVIENCE']!="":
+			condition = {"city":self.settings['CITY'],"provience":self.settings['PROVIENCE']}
+			content = self.cities_Col.find_one(condition)
+			self.cityhost = content['cityhost']
+			self.fillUrl = "http://%s.58.com/ershoufang/"%self.cityhost
+			self.city = content["_id"]
+			return [scrapy.Request(self.fillUrl)]
+	def get_sequence_request(self):
+		#按顺序进行爬取
 		requests = []
 		if self.cities_Col.count({"status":False}) <= 0:
 			self.cities_Col.update({"status":False},{"$set":{"status":False}})
@@ -38,11 +49,12 @@ class erShouSpider(Spider):
 		self.fillUrl = "http://%s.58.com/ershoufang/"%self.cityhost
 		self.city = content["_id"]
 		requests.append(scrapy.Request(self.fillUrl))
-		'''
-		for i in range(10):
-			requests.append(scrapy.Request(self.fillUrl + "pn"+str(2*i)))
-		'''
 		return requests
+	def start_requests(self):
+		if self.settings['CITY'] and self.settings['CITY'] != '':
+			return self.get_specify_request()
+		else:
+			return self.get_sequence_request()
 	def parseUrls(self,html):
 		links = html.xpath(".//a/@href")
 		urls = []
@@ -92,6 +104,7 @@ class erShouSpider(Spider):
 	def parse(self,response):
 		if(response.body =='None'):
 			return
+		print(response.url)
 		doc = html.fromstring(response.body.decode("utf-8"))
 		urls = self.parseUrls(doc)
 		items = self.parseItems(doc,response.url)

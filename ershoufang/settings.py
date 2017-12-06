@@ -8,7 +8,8 @@
 #     http://doc.scrapy.org/en/latest/topics/settings.html
 #     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
-
+CITY = '武汉'
+PROVIENCE = '湖北'
 BOT_NAME = 'ershoufang'
 MONGO_IP = '127.0.0.1'
 MONGO_PORT = 27017
