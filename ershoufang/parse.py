@@ -49,10 +49,32 @@ class LocationDumper():
 	def parseData(self,data):
 		#数据集中没有带解析的数据,解析该条数据
 		if self.locationCol.count({"_id":data["_id"]}) <= 0:
+			if self.locationCol.count({"address":data["address"]}) > 0:
+				print("同一地址不再解析"+data['address'])
+				content = self.locationCol.find_one({"address":data["address"]})
+				a = {'_id':data['_id'],
+                "size":data['size'],
+                "orient":data['orient'],
+                "roomNum":data['roomNum'],
+                "url":data['fromUrl'],
+                "unitPrice":data['unitPrice'],
+                "sumPrice":data['sumPrice'],
+                "ln":content['ln'],
+                "lat":content['lat'],
+                "address":data['address'],
+                "time":data['nowTime'],
+                "city":data['city']}
+
+				self.locationCol.insert(a)
+				self.sourceCol.update({"_id":data["_id"]},{"$set":{"status":"OK"}})
+
+				return
 			result = self.bParser.parse(data["address"],"json",data["city"])
 			#根据返回码判断解析结果是否正确,如果不正确,去掉城市参数重试
 			if result[0] and result[0]['status'] != 0:
 				result = self.bParser.parse(data["address"],"json")
+			if not result[0]:
+				return
 			jsonResult = result[0]
 			urlResult = result[1]
 			ln = None
@@ -61,9 +83,12 @@ class LocationDumper():
 				ln = jsonResult['result']['location']['lng']
 				lat = jsonResult['result']['location']['lat']
 			else:
-				print("地址解析错误,status:"+str(jsonResult['status'])+",msg:"+jsonResult['msg']+",errorUrl:"+urlResult)
-				self.sourceCol.update({"_id":data["_id"]},{"$set":{"status":"ERROR"}})
-				self.errorlength += 1
+				try:
+					print("地址解析错误,status:"+str(jsonResult['status'])+",msg:"+jsonResult['msg']+",errorUrl:"+urlResult)
+					self.sourceCol.update({"_id":data["_id"]},{"$set":{"status":"ERROR"}})
+					self.errorlength += 1
+				except:
+					print("没有错误信息,直接输出信息"+str(jsonResult))
 				return
 			try:
 					a = {'_id':data['_id'],
@@ -79,7 +104,8 @@ class LocationDumper():
 								"time":data['nowTime'],
 								"city":data['city']}	
 			except:
-				print("存储数据异常,删除该条数据,检查该条数据")
+				print("存储数据异常,检查该条数据sumprice:"+data['sumPrice']+data['address'])
+				self.sourceCol.update({"_id":data["_id"]},{"$set":{"status":"ERROR    "}})
 				return
 			self.locationCol.insert(a)
 			self.oklength += 1
@@ -109,7 +135,7 @@ if __name__ == "__main__":
 									   "location",
 									   "ershoufang",
 								     "allhousedata",
-											requestNum = 50)
+											requestNum = 10)
 	d.parse()
 	endtime = datetime.datetime.now()
 	print((endtime-starttime).seconds)
