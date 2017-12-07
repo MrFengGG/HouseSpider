@@ -41,7 +41,8 @@ class erShouSpider(Spider):
 		#按顺序进行爬取
 		requests = []
 		if self.cities_Col.count({"status":False}) <= 0:
-			self.cities_Col.update({"status":False},{"$set":{"status":False}})
+			print("全部设为false")
+			self.cities_Col.update({},{"$set":{"status":False}},True,True,True)
 		content = self.cities_Col.find_one({"status":False})
 		self.cities_Col.update({"_id":content["_id"]},{"$set":{"status":True}})
 		self.client.close()
@@ -104,7 +105,6 @@ class erShouSpider(Spider):
 	def parse(self,response):
 		if(response.body =='None'):
 			return
-		print(response.url)
 		doc = html.fromstring(response.body.decode("utf-8"))
 		urls = self.parseUrls(doc)
 		items = self.parseItems(doc,response.url)
