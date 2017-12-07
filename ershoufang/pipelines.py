@@ -39,7 +39,7 @@ class ErshoufangPipeline(object):
 				self.itemNumber += 1
 				print("爬取到第%s个房屋,地址为%s"%(self.itemNumber,item['address']))
 			except Exception,e:
-				pass
+				print("房屋已存在"+item['address'])
 			return item
 		def spider_closed(self,spider):
 			self.client.close()
