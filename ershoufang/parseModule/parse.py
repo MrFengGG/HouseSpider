@@ -139,4 +139,4 @@ if __name__ == "__main__":
 											requestNum = REQUEST_NUM)
 	d.parse()
 	endtime = datetime.datetime.now()
-	rint((endtime-starttime).seconds)
+	print((endtime-starttime).seconds)
